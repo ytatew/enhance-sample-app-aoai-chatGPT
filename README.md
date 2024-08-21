@@ -5,7 +5,7 @@ This repository contains sample code with the following enhancements to [[Previe
 1. Add the text field for system message
 2. Supports image input via screen capture and attachments
 
-<div align="center"><img src="./images/Post-Enhancement.png" width="450px"></div>
+<div align="center"><img src="./images/Post-Enhancement.png" width="800px"></div>
 
 The following description is the contents of the README for [[Preview] Sample Chat App with AOAI](https://github.com/microsoft/sample-app-aoai-chatGPT) as of August 21, 2024.
 

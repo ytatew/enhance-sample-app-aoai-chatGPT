@@ -13,7 +13,7 @@
 }
 
 .questionInputTextArea {
-  width: 100%;
+  width: 60%;
   line-height: 40px;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -21,10 +21,27 @@
   margin-right: 12px;
 }
 
-.questionInputSendButtonContainer {
-  position: absolute;
-  right: 24px;
-  bottom: 20px;
+.systemMessageTextArea {
+  width: 40%;
+  line-height: 40px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 12px;
+  margin-right: 12px;
+}  
+
+.questionInputSendButtonContainer {  
+  position: absolute;  
+  right: 24px;  
+  bottom: 20px;  
+  display: flex;  
+  gap: 10px;
+}  
+
+.questionInputAttachedFileButton {  
+  width: 24px;  
+  height: 23px;  
+  cursor: pointer;  
 }
 
 .questionInputSendButton {

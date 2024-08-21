@@ -166,17 +166,37 @@ const Chat = () => {
     }
   }
 
-  const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string) => {
-    setIsLoading(true)
-    setShowLoadingMessage(true)
-    const abortController = new AbortController()
-    abortFuncs.current.unshift(abortController)
+  const makeApiRequestWithoutCosmosDB = async (question: string, conversationId?: string, systemMessage?: string, imageBase64?: string[] | null) => {  
+    setIsLoading(true)  
+    setShowLoadingMessage(true)  
+    const abortController = new AbortController()  
+    abortFuncs.current.unshift(abortController) 
 
-    const userMessage: ChatMessage = {
-      id: uuid(),
-      role: 'user',
-      content: question,
-      date: new Date().toISOString()
+    let userMessage: ChatMessage  
+    if (imageBase64 && imageBase64.length > 0) {  
+      userMessage = {  
+        id: uuid(),  
+        role: 'user',  
+        content: JSON.stringify([  
+          { type: 'text', text: question },  
+          ...imageBase64.map(image => ({ type: 'image_url', image_url: { url: image } }))  
+        ]),  
+        date: new Date().toISOString()  
+      }  
+    } else {  
+      userMessage = {  
+        id: uuid(),  
+        role: 'user',  
+        content: question,  
+        date: new Date().toISOString()  
+      }  
+    }  
+
+    const systemMessageObj: ChatMessage = { 
+      id: uuid(),  
+      role: 'system',  
+      content: systemMessage || '',  
+      date: new Date().toISOString()  
     }
 
     let conversation: Conversation | null | undefined
@@ -184,7 +204,7 @@ const Chat = () => {
       conversation = {
         id: conversationId ?? uuid(),
         title: question,
-        messages: [userMessage],
+        messages: [systemMessageObj, userMessage],
         date: new Date().toISOString()
       }
     } else {
@@ -196,7 +216,7 @@ const Chat = () => {
         abortFuncs.current = abortFuncs.current.filter(a => a !== abortController)
         return
       } else {
-        conversation.messages.push(userMessage)
+        conversation.messages.push(systemMessageObj, userMessage)
       }
     }
 
@@ -290,18 +310,38 @@ const Chat = () => {
     return abortController.abort()
   }
 
-  const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string) => {
-    setIsLoading(true)
-    setShowLoadingMessage(true)
-    const abortController = new AbortController()
-    abortFuncs.current.unshift(abortController)
+  const makeApiRequestWithCosmosDB = async (question: string, conversationId?: string, systemMessage?: string, imageBase64?: string[] | null) => {  
+    setIsLoading(true)  
+    setShowLoadingMessage(true)  
+    const abortController = new AbortController()  
+    abortFuncs.current.unshift(abortController)  
 
-    const userMessage: ChatMessage = {
-      id: uuid(),
-      role: 'user',
-      content: question,
-      date: new Date().toISOString()
-    }
+    let userMessage: ChatMessage  
+    if (imageBase64 && imageBase64.length > 0) {  
+      userMessage = {  
+        id: uuid(),  
+        role: 'user',  
+        content: JSON.stringify([  
+          { type: 'text', text: question },  
+          ...imageBase64.map(image => ({ type: 'image_url', image_url: { url: image } }))  
+        ]),  
+        date: new Date().toISOString()  
+      }  
+    } else {  
+      userMessage = {  
+        id: uuid(),  
+        role: 'user',  
+        content: question,  
+        date: new Date().toISOString()  
+      }  
+    }  
+
+    const systemMessageObj: ChatMessage = {
+      id: uuid(),  
+      role: 'system',  
+      content: systemMessage || '',  
+      date: new Date().toISOString()  
+    }  
 
     //api call params set here (generate)
     let request: ConversationRequest
@@ -315,14 +355,14 @@ const Chat = () => {
         abortFuncs.current = abortFuncs.current.filter(a => a !== abortController)
         return
       } else {
-        conversation.messages.push(userMessage)
+        conversation.messages.push(systemMessageObj, userMessage)
         request = {
           messages: [...conversation.messages.filter(answer => answer.role !== ERROR)]
         }
       }
     } else {
       request = {
-        messages: [userMessage].filter(answer => answer.role !== ERROR)
+        messages: [systemMessageObj, userMessage].filter(answer => answer.role !== ERROR)
       }
       setMessages(request.messages)
     }
@@ -782,9 +822,23 @@ const Chat = () => {
                 {messages.map((answer, index) => (
                   <>
                     {answer.role === 'user' ? (
-                      <div className={styles.chatMessageUser} tabIndex={0}>
-                        <div className={styles.chatMessageUserMessage}>{answer.content}</div>
-                      </div>
+                    <div className={styles.chatMessageUser} tabIndex={0} style={{ display: 'block', width: '100%' }}>                          
+                    <div className={styles.chatMessageUserMessage} style={{ display: 'block', width: '100%' }}>  
+                      {Array.isArray(answer.content) ? (  
+                        answer.content.map((item, idx) => (  
+                          <div key={idx} style={{ display: 'block', width: '100%', marginBottom: '10px' }}>  
+                            {item.type === 'text' ? (  
+                              <p>{item.text}</p>  
+                            ) : item.type === 'image_url' ? (  
+                              <img src={item.image_url.url} alt="User provided content" style={{ maxWidth: '100%', display: 'block', marginBottom: '10px' }} />  
+                            ) : null}  
+                          </div>  
+                        ))  
+                      ) : (  
+                        typeof answer.content === 'object' ? JSON.stringify(answer.content) : answer.content  
+                      )}  
+                    </div>                        
+                  </div> 
                     ) : answer.role === 'assistant' ? (
                       <div className={styles.chatMessageGpt}>
                         <Answer
@@ -915,10 +969,10 @@ const Chat = () => {
                 clearOnSend
                 placeholder="Type a new question..."
                 disabled={isLoading}
-                onSend={(question, id) => {
+                onSend={(question, id, systemMessage, imageBase64) => {
                   appStateContext?.state.isCosmosDBAvailable?.cosmosDB
-                    ? makeApiRequestWithCosmosDB(question, id)
-                    : makeApiRequestWithoutCosmosDB(question, id)
+                    ? makeApiRequestWithCosmosDB(question, id, systemMessage, imageBase64)
+                    : makeApiRequestWithoutCosmosDB(question, id, systemMessage, imageBase64)
                 }}
                 conversationId={
                   appStateContext?.state.currentChat?.id ? appStateContext?.state.currentChat?.id : undefined

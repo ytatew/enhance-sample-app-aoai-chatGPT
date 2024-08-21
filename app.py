@@ -455,6 +455,22 @@ async def add_conversation():
                 )
         else:
             raise Exception("No user message found")
+        
+        if len(messages) > 0 and messages[-2]["role"] == "system":
+            createdMessageValue = await current_app.cosmos_conversation_client.create_message(
+                uuid=str(uuid.uuid4()),
+                conversation_id=conversation_id,
+                user_id=user_id,
+                input_message=messages[-2],
+            )
+            if createdMessageValue == "Conversation not found":
+                raise Exception(
+                    "Conversation not found for the given conversation ID: "
+                    + conversation_id
+                    + "."
+                )
+        else:
+            raise Exception("No system message found")
 
         # Submit request to Chat Completions for response
         request_body = await request.get_json()

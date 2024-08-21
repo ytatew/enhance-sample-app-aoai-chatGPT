@@ -3,13 +3,26 @@ import { chatHistorySampleData } from '../constants/chatHistory'
 import { ChatMessage, Conversation, ConversationRequest, CosmosDBHealth, CosmosDBStatus, UserInfo } from './models'
 
 export async function conversationApi(options: ConversationRequest, abortSignal: AbortSignal): Promise<Response> {
+  const transformedMessages = options.messages.map(message => {  
+    if (message.role === 'user') {
+      try {  
+        message.content = JSON.parse(message.content);  
+      } catch (e) {  
+        console.error('Failed to parse user content:', e);  
+      }  
+    }
+    if (typeof message.content === 'number') {  
+      message.content = String(message.content);  
+    }
+    return message;  
+  });
   const response = await fetch('/conversation', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      messages: options.messages
+      messages: transformedMessages
     }),
     signal: abortSignal
   })
@@ -117,15 +130,28 @@ export const historyGenerate = async (
   abortSignal: AbortSignal,
   convId?: string
 ): Promise<Response> => {
+  const transformedMessages = options.messages.map(message => {  
+    if (message.role === 'user') {
+      try {  
+        message.content = JSON.parse(message.content);  
+      } catch (e) {  
+        console.error('Failed to parse user content:', e);  
+      }  
+    }
+    if (typeof message.content === 'number') {  
+      message.content = String(message.content);  
+    }
+    return message;  
+  })
   let body
   if (convId) {
     body = JSON.stringify({
       conversation_id: convId,
-      messages: options.messages
+      messages: transformedMessages
     })
   } else {
     body = JSON.stringify({
-      messages: options.messages
+      messages: transformedMessages
     })
   }
   const response = await fetch('/history/generate', {

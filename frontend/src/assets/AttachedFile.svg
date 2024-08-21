@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48">  
+  <defs>  
+    <style>  
+      .a {  
+        fill: none;  
+        stroke: #0F6CBD;  
+        stroke-miterlimit: 10;  
+        stroke-width: 2px;  
+      }  
+    </style>  
+  </defs>  
+  <title>1048_cl_h</title>  
+  <path class="a" d="M27.9,16.65v12.8a4.45,4.45,0,0,1-8.89,0V15.5a7.59,7.59,0,0,1,15.17,0V29.93a10.18,10.18,0,0,1-20.36,0V18.08"/>  
+</svg> 

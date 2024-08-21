@@ -1,6 +1,13 @@
 # [Preview] Sample Chat App with AOAI
 
-This repo contains sample code for a simple chat webapp that integrates with Azure OpenAI. Note: some portions of the app use preview APIs.
+This repository contains sample code with the following enhancements to [[Preview] Sample Chat App with AOAI](https://github.com/microsoft/sample-app-aoai-chatGPT):
+
+1. Add the text field for system message
+2. Supports image input via screen capture and attachments
+
+<div align="center"><img src="./images/Post-Enhancement.png" width="450px"></div>
+
+The following description is the contents of the README for [[Preview] Sample Chat App with AOAI](https://github.com/microsoft/sample-app-aoai-chatGPT) as of August 21, 2024.
 
 ## Prerequisites
 - An existing Azure OpenAI resource and model deployment of a chat model (e.g. `gpt-35-turbo-16k`, `gpt-4`)
@@ -43,13 +50,6 @@ cat .env | jq -R '. | capture("(?<name>[A-Z_]+)=(?<value>.*)")' | jq -s '.[].slo
 
 ### Deploy with Azure Developer CLI
 Please see [README_azd.md](./README_azd.md) for detailed instructions.
-
-### One click Azure deployment
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2Fsample-app-aoai-chatGPT%2Fmain%2Finfrastructure%2Fdeployment.json)
-
-Click on the Deploy to Azure button and configure your settings in the Azure Portal as described in the [Environment variables](#environment-variables) section.
-
-Please see the [section below](#add-an-identity-provider) for important information about adding authentication to your app.
 
 ### Deploy from your local machine
 
